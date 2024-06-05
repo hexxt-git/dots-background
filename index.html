@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dots background</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <h1>welcome to my website</h1>
+    <p>this website previews this dots background</p>
+</body>
+<style>
+    body {
+        background: #000;
+        color: white;
+    }
+    canvas{
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+</style>
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const buffer = 100
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    window.addEventListener('resize', ()=>{
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    })
+    
+    let dots = []
+    let mouse = false
+    window.addEventListener('mousedown', () => {
+        mouse = true
+    })
+    window.addEventListener('mouseup', () => {
+        mouse = false
+    })
+    window.addEventListener('mouseleave', () => {
+        mouse = false
+    })
+
+    window.addEventListener('mousemove', event => {
+        if(!mouse) return;
+        dots.push({
+            x: event.x,
+            y: event.y,
+            vx: Math.random()-.5,
+            vy: Math.random()-.5,
+        })
+    })
+
+    function update(){
+        if(dots.length < window.innerHeight * window.innerWidth / 9000){
+            dots.push({x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight, vx: Math.random()-.5, vy: Math.random()-.5})
+        }
+        if(dots.length > window.innerHeight * window.innerWidth / 8000){
+            dots.shift()
+        }   
+        dots.forEach(dot => {
+            dot.x += dot.vx * 2.2
+            dot.y += dot.vy * 2.2
+        })
+        dots = dots.filter(dot => dot.x > 0 - buffer && dot.x < window.innerWidth + buffer && dot.y > 0 - buffer && dot.y < window.innerHeight + buffer)
+        
+        ctx.fillStyle = 'white'
+        ctx.strokeStyle = '#fff1'
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+        dots.forEach(dot => {
+            ctx.fillRect(dot.x, dot.y, 2, 2)
+            dots.forEach(dot2 => {
+                ctx.beginPath()
+                ctx.moveTo(dot.x, dot.y)
+                ctx.lineTo(dot2.x, dot2.y)
+                let dist = Math.sqrt((dot2.x - dot.x)**2 + (dot2.y - dot.y)**2) + 0.1
+                if(dist > 300) dist = 100000
+                ctx.strokeStyle = `rgba(255, 255, 255, ${Math.min((10/dist)**1.6, 0.7)})`
+                ctx.stroke()
+            })
+        })
+    }
+    setInterval(update, 1000/30)
+
+</script>
+
+</html>
